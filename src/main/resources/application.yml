@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/udemy
+    password: postgres
+    username: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: update
