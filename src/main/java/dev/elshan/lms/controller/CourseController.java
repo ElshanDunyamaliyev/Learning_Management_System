@@ -17,7 +17,6 @@ public class CourseController {
 
     @GetMapping
     public List<Course> getAll() {
-        System.out.println("Something");
         return service.getAllCourses();
     }
 

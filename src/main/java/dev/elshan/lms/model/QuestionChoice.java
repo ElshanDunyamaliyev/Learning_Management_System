@@ -3,16 +3,13 @@ package dev.elshan.lms.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Question {
+public class QuestionChoice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +19,6 @@ public class Question {
     @Column(name = "name")
     private String name;
 
-    @OneToMany
-    private Set<QuestionChoice> questionChoices = new HashSet<>();
+    @Column(name = "is_correct_choice")
+    private Boolean isCorrectChoice = false;
 }
