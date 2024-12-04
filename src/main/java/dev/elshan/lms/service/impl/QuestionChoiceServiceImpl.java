@@ -42,8 +42,9 @@ public class QuestionChoiceServiceImpl implements QuestionChoiceService {
     public void saveQuestionChoice(Long questionId, List<QuestionChoice> questionChoices) {
         var question = questionService.getQuestion(questionId);
         questionChoices.forEach(questionChoice -> {
+            questionChoice.setQuestion(question);
             repository.save(questionChoice);
-            question.getQuestionChoices().add(questionChoice);
+//            question.getQuestionChoices().add(questionChoice);
         });
         questionService.updateQuestion(questionId,question);
     }

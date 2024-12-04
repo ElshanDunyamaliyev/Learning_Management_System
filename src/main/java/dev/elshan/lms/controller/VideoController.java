@@ -2,17 +2,22 @@ package dev.elshan.lms.controller;
 
 import dev.elshan.lms.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -22,19 +27,15 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
-import java.io.IOException;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/video")
-//@EnableAsync
 public class VideoController {
 
-    private final VideoRepository repository;
+    private final ResourceLoader resourceLoader;
 
-    @GetMapping
-//    @Async
-    public ResponseEntity<Resource> getVideo() throws IOException {
+    @GetMapping(produces = "video/mp4")
+    public Mono<Resource> getVideo(@RequestHeader("Range") String range) {
         String awsAccessKey = System.getenv("accessKey");
         String awsSecretKey = System.getenv("secretKey");
         AwsCredentials credentials = AwsBasicCredentials.create(awsAccessKey, awsSecretKey);
@@ -46,25 +47,20 @@ public class VideoController {
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .build();
 
-        String range = "bytes=" + 500 + "-" + 1000;
-
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket("lmsdemo1")
                 .key("18. L1 Cache Reference Types.mp4")
-//                .range(range)
+                .range(range)
                 .build();
 
-        GetObjectResponse response = s3Client.getObject(getObjectRequest).response();
+        ResponseInputStream<GetObjectResponse> s3ObjectStream = s3Client.getObject(getObjectRequest);
+        GetObjectResponse response = s3ObjectStream.response();
 
-        Resource videoResource = new InputStreamResource(s3Client.getObject(getObjectRequest));
+        System.out.println(range);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, "video/mp4");
-        headers.add(HttpHeaders.CONTENT_RANGE, "bytes " + 0 + "-" + 10 + "/" + response.contentLength());
+        return Mono.fromSupplier(() -> resourceLoader.
+                getResource("https://lmsdemo1.s3.eu-central-1.amazonaws.com/18.+L1+Cache+Reference+Types.mp4"));
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentType(MediaType.valueOf("video/mp4"))
-                .body(videoResource);
     }
+
 }

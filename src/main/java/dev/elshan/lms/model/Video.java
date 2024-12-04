@@ -3,6 +3,8 @@ package dev.elshan.lms.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Set;
+
 @Entity
 @Getter
 @Setter
@@ -26,4 +28,7 @@ public class Video {
     @Column(name = "data", columnDefinition = "BYTEA")
     private byte[] data;
 
+    @ManyToOne
+    @JoinColumn(name = "section_id")
+    private Section section;
 }

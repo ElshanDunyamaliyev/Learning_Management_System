@@ -21,6 +21,8 @@ public class Quiz {
     @Column(name = "name")
     private String name;
 
-    @OneToMany
-    private Set<Question> question;
+    @ManyToOne
+    @JoinColumn(name = "lesson_id")
+    private Lesson lesson;
+
 }

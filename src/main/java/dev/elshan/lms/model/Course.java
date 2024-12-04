@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 
+import java.io.Serializable;
 import java.util.Set;
 
 @Entity
@@ -13,7 +15,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Course {
+public class Course implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,19 +34,14 @@ public class Course {
     @Column(name = "discounted_price")
     private Double discountedPrice;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "instructor_course",
             joinColumns = @JoinColumn(name = "course_id"),
             inverseJoinColumns = @JoinColumn(name = "instructor_id"))
     private Set<Instructor> instructor;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<Category> category;
 
-    @OneToMany
-    private Set<Video> video;
-
-    @OneToMany
-    private Set<Section> section;
 }

@@ -22,6 +22,8 @@ public class Question {
     @Column(name = "name")
     private String name;
 
-    @OneToMany
-    private Set<QuestionChoice> questionChoices = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "quiz_id")
+    private Quiz quiz;
+
 }
